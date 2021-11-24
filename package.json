@@ -1,0 +1,25 @@
+{
+  "name": "mysql-employee-database-management",
+  "version": "1.0.0",
+  "description": "An application built to allows you view employees, manage departments, roles, in a company. For planning and organize business.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wizeeee/MySQL-Employee-Database-Management.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Wizeeee/MySQL-Employee-Database-Management/issues"
+  },
+  "homepage": "https://github.com/Wizeeee/MySQL-Employee-Database-Management#readme",
+  "dependencies": {
+    "console.table": "^0.10.0",
+    "dotenv": "^10.0.0",
+    "inquirer": "^8.2.0",
+    "mysql2": "^2.3.3"
+  }
+}
