@@ -503,3 +503,108 @@ const addNewRole = () => {
       });
   });
 };
+//                --Remove Employee Function (QUERY)--
+// -----------------------------------------------------------------------
+
+const removeEmployee = () => {
+  //database query using sql to select all employee
+  db.query(`SELECT * FROM employee`, (err, res) => {
+    if (err) {
+      console.log(err);
+    }
+    //create new array with key and value for role to choose from
+    const chooseEmployee = res.map(({ id, first_name, last_name }) => ({
+      name: first_name + " " + last_name,
+      value: id,
+    }));
+    //prompt user with list of employee to choose from
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          name: "employee",
+          message: "Which employee would you like to delete?",
+          choices: chooseEmployee,
+        },
+      ])
+      .then((choice) => {
+        const { employee } = choice;
+        const sql = `DELETE FROM employee WHERE id = ?`;
+        db.query(sql, employee, (err, res) => {
+          console.log(err);
+        });
+        //If successfull, print success message for user
+        console.log(`Employee was deleted from the database!`);
+        //call initializing function to return to main prompt
+        manageEmployees();
+      });
+  });
+};
+
+//              --Update Employee Role Function (QUERY)--
+// -----------------------------------------------------------------------
+
+const updateEmplRole = () => {
+  //db query with SQL to select all employees
+  db.query(`SELECT * FROM employee`, (err, res) => {
+    if (err) {
+      console.log(err);
+    }
+    //create new array with key and value for role to choose from
+    const chooseEmployee = res.map(({ id, first_name, last_name }) => ({
+      name: first_name + " " + last_name,
+      value: id,
+    }));
+
+    //prompt user to with list of all employees
+    inquirer
+      //select which employee
+      .prompt([
+        {
+          type: "list",
+          name: "employee",
+          message: "Which employee would you like to update?",
+          choices: chooseEmployee,
+        },
+      ])
+      .then((choice) => {
+        //save into insertion array
+        const emplInfo = [choice.employee];
+        //db query to select all roles
+        db.query(`SELECT * FROM role`, (err, res) => {
+          if (err) {
+            console.log(err);
+          }
+          //create new array with key and value for role to choose from
+          const chooseRole = res.map(({ id, title }) => ({
+            name: title,
+            value: id,
+          }));
+          //prompt user with list of roles to choose from
+          inquirer
+            .prompt({
+              type: "list",
+              name: "role",
+              message: "Select the employee's new role",
+              choices: chooseRole,
+            })
+            .then((choice) => {
+              //add role to start of emplInfo array to keep correct order
+              emplInfo.unshift(choice.role);
+              //update the employee's role
+              const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
+              // db query using sql variable and new employee info
+              db.query(sql, emplInfo, (err, res) => {
+                if (err) {
+                  console.log(err);
+                }
+                //If successfull, print success message for user
+                console.log("The employee's role was successfully updated!");
+                //call initializing function to return to main prompt
+                manageEmployees();
+              });
+            });
+        });
+      });
+  });
+};
