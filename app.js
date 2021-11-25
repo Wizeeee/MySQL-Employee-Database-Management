@@ -608,3 +608,114 @@ const updateEmplRole = () => {
       });
   });
 };
+
+//              --Update Employee Manager Function (QUERY)--
+// -----------------------------------------------------------------------
+
+const updateEmplManager = () => {
+  //db query with SQL to select all employees
+  db.query(`SELECT * FROM employee`, (err, res) => {
+    if (err) {
+      console.log(err);
+    }
+    //create new array with key and value for role to choose from
+    const chooseEmployee = res.map(({ id, first_name, last_name }) => ({
+      name: first_name + " " + last_name,
+      value: id,
+    }));
+    // prompt user with a list of all employees to choose from
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          name: "employee",
+          message: "Which employee would you like to update?",
+          choices: chooseEmployee,
+        },
+      ])
+      .then((choice) => {
+        //create an array to hold employee information
+        const emplInfo = [choice.employee];
+        //query to Select all employees with no manager or manager id = 36 (general manager)
+        const sql = `SELECT * FROM employee WHERE manager_id > 38 OR manager_id is NULL`;
+        //database query
+        db.query(sql, (err, res) => {
+          if (err) {
+            console.log(err);
+          }
+          //create new array with key and value for role to choose from
+          const chooseManager = res.map(({ id, first_name, last_name }) => ({
+            name: first_name + " " + last_name,
+            value: id,
+          }));
+
+          //prompt user with list of managers to choose from
+          inquirer
+            .prompt({
+              type: "list",
+              name: "manager",
+              message: "Select new manager",
+              choices: chooseManager,
+            })
+            .then((choice) => {
+              //ensure proper order employee info so it can be inserted into database correctly
+              emplInfo.unshift(choice.manager);
+              const sql = `UPDATE employee SET manager_id = ? WHERE id = ?`;
+              // update employee with new manager
+              db.query(sql, emplInfo, (err, res) => {
+                if (err) {
+                  console.log(err);
+                }
+                //If successfull, print success message for user
+                console.log("The employee's manager was successfully updated!");
+                //call initializing function to return to main prompt
+                manageEmployees();
+              });
+            });
+        });
+      });
+  });
+};
+
+//             --Department Employee Budget Function (QUERY)--
+// -----------------------------------------------------------------------
+
+const deptEmplBudget = () => {
+  //query to Select all departments
+  db.query(`SELECT * FROM department`, (err, res) => {
+    if (err) {
+      console.log(err);
+    }
+    //create new array with key and value for role to choose from
+    const chooseDept = res.map(({ id, dept_name }) => ({
+      name: dept_name,
+      value: id,
+    }));
+    //prompt the user to choose from list of departments
+    inquirer
+      //select depo
+      .prompt([
+        {
+          type: "list",
+          name: "deptBudget",
+          message: "Which department's employee budget would you like to see?",
+          choices: chooseDept,
+        },
+      ])
+      .then((choice) => {
+        //deconstruct "name:" and save as choice parameter
+        const { deptBudget } = choice;
+        //Select sum of salaries from role where dept id = ?
+        const sql = `SELECT SUM(salary) AS Department_Budget FROM role WHERE department_id = ?`;
+        db.query(sql, deptBudget, (err, res) => {
+          if (err) {
+            console.log(err);
+          }
+          //print table of results to node
+          console.table(res);
+          //call initializing function to return to main prompt
+          manageEmployees();
+        });
+      });
+  });
+};
